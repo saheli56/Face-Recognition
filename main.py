@@ -1,14 +1,25 @@
 import cv2
 # Use the correct path for the Haar cascade file
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-# Open a video capture object to read from the default camera (0)
-url = "" \
-"http://100.103.189.25:8080/video"
+# Try to open the IP camera stream
+url = "http://100.100.56.170:8080/video"
 video_cap = cv2.VideoCapture(url)
+
+if not video_cap.isOpened():
+    print(f"Failed to open stream at {url}. Trying local webcam...")
+    video_cap = cv2.VideoCapture(0)
+    if not video_cap.isOpened():
+        print("Failed to open local webcam. Please check your camera connection.")
+        exit(1)
+    else:
+        print("Local webcam opened successfully.")
+else:
+    print(f"Stream opened successfully at {url}")
+
 while True:
     ret, video_data = video_cap.read()
     if not ret or video_data is None:
-        print("Failed to grab frame from camera.")
+        print("Failed to grab frame from camera. Check if the stream URL is correct and accessible.")
         break
     col = cv2.cvtColor(video_data, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(
